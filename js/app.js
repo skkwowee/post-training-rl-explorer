@@ -27,6 +27,18 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) { el.textContent = el.dataset.formula; }
   });
 
+  // ===== Bidirectional Symbol Highlighting =====
+  document.querySelectorAll('[data-symbol]').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      const sym = el.dataset.symbol;
+      document.querySelectorAll(`[data-symbol="${sym}"]`).forEach(m => m.classList.add('sym-highlight'));
+    });
+    el.addEventListener('mouseleave', () => {
+      const sym = el.dataset.symbol;
+      document.querySelectorAll(`[data-symbol="${sym}"]`).forEach(m => m.classList.remove('sym-highlight'));
+    });
+  });
+
   // ===== Chart.js Global Config =====
   Chart.defaults.color = '#7a6f63';
   Chart.defaults.borderColor = 'rgba(200,191,176,0.4)';

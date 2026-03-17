@@ -231,6 +231,28 @@ a:hover { color: var(--accent-light); }
   text-align: center;
 }
 
+/* ===== Symbol Highlighting ===== */
+[data-symbol] {
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+  border-radius: 2px;
+}
+
+[data-symbol].sym-highlight {
+  background: rgba(196, 122, 26, 0.15);
+  box-shadow: 0 0 0 3px rgba(196, 122, 26, 0.15);
+}
+
+.sym-ref {
+  font-style: normal;
+  border-bottom: 1px dashed var(--rule);
+}
+
+.sym-ref.sym-highlight {
+  border-bottom-color: var(--orange);
+  color: var(--text);
+}
+
 /* ===== Math Tooltips ===== */
 [data-tip] {
   position: relative;

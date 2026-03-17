@@ -183,12 +183,12 @@
     <h3>PPO Objective</h3>
     <p>PPO prevents the policy from changing too drastically in a single update by <strong>clipping</strong> the probability ratio:</p>
     <div class="math-block">
-      <span class="math-render" data-formula="\htmlData{tip=PPO clipped objective}{L^{CLIP}(\theta)} = \mathbb{E}_t \left[ \min\left( \htmlData{tip=probability ratio: new policy / old policy}{r_t(\theta)} \htmlData{tip=estimated advantage}{\hat{A}_t}, \; \text{clip}(\htmlData{tip=probability ratio}{r_t(\theta)}, 1-\htmlData{tip=clip range (e.g. 0.2)}{\epsilon}, 1+\htmlData{tip=clip range}{\epsilon}) \htmlData{tip=estimated advantage}{\hat{A}_t} \right) \right]"></span>
+      <span class="math-render" data-formula="\htmlData{tip=PPO clipped objective}{L^{CLIP}(\theta)} = \mathbb{E}_t \left[ \min\left( \htmlData{symbol=ppo-ratio}{\htmlData{tip=probability ratio: new policy / old policy}{r_t(\theta)}} \htmlData{symbol=ppo-adv}{\htmlData{tip=estimated advantage}{\hat{A}_t}}, \; \text{clip}(\htmlData{symbol=ppo-ratio}{\htmlData{tip=probability ratio}{r_t(\theta)}}, 1-\htmlData{symbol=ppo-eps}{\htmlData{tip=clip range (e.g. 0.2)}{\epsilon}}, 1+\htmlData{symbol=ppo-eps}{\htmlData{tip=clip range}{\epsilon}}) \htmlData{symbol=ppo-adv}{\htmlData{tip=estimated advantage}{\hat{A}_t}} \right) \right]"></span>
     </div>
-    <p>Where <span class="math-inline" data-formula="r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}"></span> is the probability ratio, and <span class="math-inline" data-formula="\epsilon"></span> controls how far the policy can move per step.</p>
-    <p>The full RLHF objective adds a KL penalty to prevent reward hacking:</p>
+    <p>Where <span class="sym-ref" data-symbol="ppo-ratio"><span class="math-inline" data-formula="r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}"></span> is the probability ratio</span>, and <span class="sym-ref" data-symbol="ppo-eps"><span class="math-inline" data-formula="\epsilon"></span> controls how far the policy can move</span> per step.</p>
+    <p>The full RLHF objective adds a <span class="sym-ref" data-symbol="ppo-kl">KL penalty</span> to prevent reward hacking:</p>
     <div class="math-block">
-      <span class="math-render" data-formula="\max_\theta \; \mathbb{E}_{x \sim D,\, y \sim \pi_\theta} \left[ \htmlData{tip=learned reward model score}{R_\phi(x, y)} - \htmlData{tip=KL penalty weight}{\beta} \, \htmlData{tip=KL divergence from reference policy}{\text{KL}(\pi_\theta \| \pi_{\text{ref}})} \right]"></span>
+      <span class="math-render" data-formula="\max_\theta \; \mathbb{E}_{x \sim D,\, y \sim \pi_\theta} \left[ \htmlData{symbol=ppo-rm}{\htmlData{tip=learned reward model score}{R_\phi(x, y)}} - \htmlData{symbol=ppo-beta}{\htmlData{tip=KL penalty weight}{\beta}} \, \htmlData{symbol=ppo-kl}{\htmlData{tip=KL divergence from reference policy}{\text{KL}(\pi_\theta \| \pi_{\text{ref}})}} \right]"></span>
     </div>
   </div>
 
@@ -269,13 +269,13 @@
     <h3>How it works</h3>
     <p>DPO's key insight: you don't need a separate reward model. The <strong>optimal policy under the RLHF objective has a closed-form solution</strong> that relates the reward to the log-ratio of the policy and reference model:</p>
     <div class="math-block">
-      <span class="math-render" data-formula="\htmlData{tip=implicit reward}{r(x, y)} = \htmlData{tip=inverse temperature}{\beta} \log \frac{\htmlData{tip=current policy}{\pi_\theta(y|x)}}{\htmlData{tip=frozen reference policy}{\pi_{\text{ref}}(y|x)}} + \beta \log \htmlData{tip=partition function (cancels out)}{Z(x)}"></span>
+      <span class="math-render" data-formula="\htmlData{tip=implicit reward}{r(x, y)} = \htmlData{symbol=dpo-beta}{\htmlData{tip=inverse temperature}{\beta}} \log \frac{\htmlData{symbol=dpo-policy}{\htmlData{tip=current policy}{\pi_\theta(y|x)}}}{\htmlData{symbol=dpo-ref}{\htmlData{tip=frozen reference policy}{\pi_{\text{ref}}(y|x)}}} + \beta \log \htmlData{symbol=dpo-Z}{\htmlData{tip=partition function (cancels out)}{Z(x)}}"></span>
     </div>
-    <p>Substituting this into the Bradley-Terry preference model gives us a loss we can optimize <strong>directly on preference pairs</strong>, bypassing reward modeling entirely:</p>
+    <p>Substituting this into the Bradley-Terry preference model gives us a loss we can optimize <strong>directly on <span class="sym-ref" data-symbol="dpo-pref">preference pairs</span></strong>, bypassing reward modeling entirely:</p>
     <div class="math-block">
-      <span class="math-render" data-formula="\htmlData{tip=DPO loss}{\mathcal{L}_{\text{DPO}}(\theta)} = -\mathbb{E}_{(\htmlData{tip=prompt}{x},\, \htmlData{tip=preferred response}{y_w},\, \htmlData{tip=rejected response}{y_l})} \left[ \log \htmlData{tip=sigmoid function}{\sigma} \left( \htmlData{tip=inverse temperature}{\beta} \log \frac{\htmlData{tip=policy prob of preferred}{\pi_\theta(y_w|x)}}{\htmlData{tip=reference prob of preferred}{\pi_{\text{ref}}(y_w|x)}} - \beta \log \frac{\htmlData{tip=policy prob of rejected}{\pi_\theta(y_l|x)}}{\htmlData{tip=reference prob of rejected}{\pi_{\text{ref}}(y_l|x)}} \right) \right]"></span>
+      <span class="math-render" data-formula="\htmlData{tip=DPO loss}{\mathcal{L}_{\text{DPO}}(\theta)} = -\mathbb{E}_{(\htmlData{tip=prompt}{x},\, \htmlData{symbol=dpo-pref}{\htmlData{tip=preferred response}{y_w}},\, \htmlData{symbol=dpo-rej}{\htmlData{tip=rejected response}{y_l}})} \left[ \log \sigma \left( \htmlData{symbol=dpo-beta}{\htmlData{tip=inverse temperature}{\beta}} \log \frac{\htmlData{symbol=dpo-policy}{\htmlData{tip=policy prob of preferred}{\pi_\theta(y_w|x)}}}{\htmlData{symbol=dpo-ref}{\htmlData{tip=reference prob of preferred}{\pi_{\text{ref}}(y_w|x)}}} - \beta \log \frac{\htmlData{symbol=dpo-policy}{\htmlData{tip=policy prob of rejected}{\pi_\theta(y_l|x)}}}{\htmlData{symbol=dpo-ref}{\htmlData{tip=reference prob of rejected}{\pi_{\text{ref}}(y_l|x)}}} \right) \right]"></span>
     </div>
-    <p>The parameter <span class="math-inline" data-formula="\beta"></span> controls how much the policy can deviate from the reference. Higher <span class="math-inline" data-formula="\beta"></span> = stronger preference signal but more divergence allowed.</p>
+    <p>The parameter <span class="sym-ref" data-symbol="dpo-beta"><span class="math-inline" data-formula="\beta"></span> controls how much the policy can deviate from the reference</span>. Higher <span class="math-inline" data-formula="\beta"></span> = stronger preference signal but more divergence allowed.</p>
   </div>
 
   <div class="chart-wrapper">
@@ -360,11 +360,11 @@
   <div class="card">
     <h3>How it works</h3>
     <p>KTO is motivated by <strong>prospect theory</strong> from behavioral economics: humans perceive losses more strongly than equivalent gains. Instead of preference pairs, KTO only needs <strong>binary feedback</strong> — thumbs up or thumbs down on individual outputs.</p>
-    <p>The key insight: in prospect theory, the value function is <strong>concave for gains and convex for losses</strong>, with losses weighted more heavily (loss aversion parameter <span class="math-inline" data-formula="\lambda"></span>).</p>
+    <p>The key insight: in prospect theory, the <span class="sym-ref" data-symbol="kto-v">value function</span> is <strong>concave for gains and convex for losses</strong>, with losses weighted more heavily (<span class="sym-ref" data-symbol="kto-lambda">loss aversion parameter <span class="math-inline" data-formula="\lambda"></span></span>).</p>
     <div class="math-block">
-      <span class="math-render" data-formula="\htmlData{tip=KTO loss}{\mathcal{L}_{\text{KTO}}(\theta)} = \mathbb{E}_{x,y} \left[ \htmlData{tip=loss aversion weight (varies for good/bad)}{\lambda_y} \left(1 - \htmlData{tip=value function (sigmoid-based)}{v}\left(\htmlData{tip=inverse temperature}{\beta} \left(\log \frac{\htmlData{tip=current policy}{\pi_\theta(y|x)}}{\htmlData{tip=reference policy}{\pi_{\text{ref}}(y|x)}} - \htmlData{tip=reference point: expected KL}{z_{\text{ref}}}\right)\right)\right) \right]"></span>
+      <span class="math-render" data-formula="\htmlData{tip=KTO loss}{\mathcal{L}_{\text{KTO}}(\theta)} = \mathbb{E}_{x,y} \left[ \htmlData{symbol=kto-lambda}{\htmlData{tip=loss aversion weight (varies for good/bad)}{\lambda_y}} \left(1 - \htmlData{symbol=kto-v}{\htmlData{tip=value function (sigmoid-based)}{v}}\left(\htmlData{tip=inverse temperature}{\beta} \left(\log \frac{\htmlData{tip=current policy}{\pi_\theta(y|x)}}{\htmlData{tip=reference policy}{\pi_{\text{ref}}(y|x)}} - \htmlData{symbol=kto-zref}{\htmlData{tip=reference point: expected KL}{z_{\text{ref}}}}\right)\right)\right) \right]"></span>
     </div>
-    <p>Where <span class="math-inline" data-formula="v(x) = \sigma(x)"></span> for desirable outputs (<span class="math-inline" data-formula="\lambda_y = \lambda_D"></span>) and <span class="math-inline" data-formula="v(x) = \sigma(-x)"></span> for undesirable outputs (<span class="math-inline" data-formula="\lambda_y = \lambda_U"></span>). The reference point <span class="math-inline" data-formula="z_{\text{ref}}"></span> is the expected KL divergence.</p>
+    <p>Where <span class="sym-ref" data-symbol="kto-v"><span class="math-inline" data-formula="v(x) = \sigma(x)"></span> for desirable outputs</span> (<span class="sym-ref" data-symbol="kto-lambda"><span class="math-inline" data-formula="\lambda_y = \lambda_D"></span></span>) and <span class="math-inline" data-formula="v(x) = \sigma(-x)"></span> for undesirable outputs (<span class="sym-ref" data-symbol="kto-lambda"><span class="math-inline" data-formula="\lambda_y = \lambda_U"></span></span>). The <span class="sym-ref" data-symbol="kto-zref">reference point <span class="math-inline" data-formula="z_{\text{ref}}"></span></span> is the expected KL divergence.</p>
   </div>
 
   <div class="chart-wrapper">
@@ -451,14 +451,14 @@ z_ref = <span class="fn">mean</span>([<span class="fn">KL</span>(policy(y|x) ∥
 
   <div class="card">
     <h3>How it works</h3>
-    <p>GRPO simplifies PPO by <strong>eliminating the critic (value) network entirely</strong>. Instead of learning a value function to estimate advantages, GRPO samples a <strong>group</strong> of outputs for each prompt and uses the group statistics as a baseline.</p>
-    <p>For each prompt <span class="math-inline" data-formula="x"></span>, sample <span class="math-inline" data-formula="G"></span> responses <span class="math-inline" data-formula="\{y_1, \ldots, y_G\}"></span>, score each with a reward model, then normalize within the group:</p>
+    <p>GRPO simplifies PPO by <strong>eliminating the critic (value) network entirely</strong>. Instead of learning a value function to estimate <span class="sym-ref" data-symbol="grpo-adv">advantages</span>, GRPO samples a <span class="sym-ref" data-symbol="grpo-G"><strong>group</strong></span> of outputs for each prompt and uses the <span class="sym-ref" data-symbol="grpo-mean">group statistics</span> as a baseline.</p>
+    <p>For each prompt <span class="math-inline" data-formula="x"></span>, sample <span class="sym-ref" data-symbol="grpo-G"><span class="math-inline" data-formula="G"></span> responses</span> <span class="math-inline" data-formula="\{y_1, \ldots, y_G\}"></span>, score each with a reward model, then normalize within the group:</p>
     <div class="math-block">
-      <span class="math-render" data-formula="\htmlData{tip=normalized advantage for sample i}{\hat{A}_i} = \frac{\htmlData{tip=reward for sample i}{r_i} - \htmlData{tip=group mean reward}{\text{mean}(\mathbf{r})}}{\htmlData{tip=group reward std dev}{\text{std}(\mathbf{r})}}"></span>
+      <span class="math-render" data-formula="\htmlData{symbol=grpo-adv}{\htmlData{tip=normalized advantage for sample i}{\hat{A}_i}} = \frac{\htmlData{tip=reward for sample i}{r_i} - \htmlData{symbol=grpo-mean}{\htmlData{tip=group mean reward}{\text{mean}(\mathbf{r})}}}{\htmlData{tip=group reward std dev}{\text{std}(\mathbf{r})}}"></span>
     </div>
-    <p>The policy is then updated using a PPO-style clipped objective with these group-relative advantages and a KL penalty to the reference policy:</p>
+    <p>The policy is then updated using a PPO-style clipped objective with these <span class="sym-ref" data-symbol="grpo-adv">group-relative advantages</span> and a KL penalty to the reference policy:</p>
     <div class="math-block">
-      <span class="math-render" data-formula="\htmlData{tip=GRPO loss}{\mathcal{L}_{\text{GRPO}}(\theta)} = -\frac{1}{\htmlData{tip=group size}{G}}\sum_{i=1}^{G} \min\left(\frac{\htmlData{tip=new policy prob}{\pi_\theta(y_i|x)}}{\htmlData{tip=old policy prob}{\pi_{\theta_{old}}(y_i|x)}}\htmlData{tip=group-relative advantage}{\hat{A}_i}, \;\text{clip}(\cdot, 1\!\pm\!\htmlData{tip=clip range}{\epsilon})\hat{A}_i\right) + \htmlData{tip=KL penalty weight}{\beta} \, \htmlData{tip=KL divergence from reference}{\text{KL}(\pi_\theta \| \pi_{\text{ref}})}"></span>
+      <span class="math-render" data-formula="\htmlData{tip=GRPO loss}{\mathcal{L}_{\text{GRPO}}(\theta)} = -\frac{1}{\htmlData{symbol=grpo-G}{\htmlData{tip=group size}{G}}}\sum_{i=1}^{G} \min\left(\frac{\htmlData{tip=new policy prob}{\pi_\theta(y_i|x)}}{\htmlData{tip=old policy prob}{\pi_{\theta_{old}}(y_i|x)}}\htmlData{symbol=grpo-adv}{\htmlData{tip=group-relative advantage}{\hat{A}_i}}, \;\text{clip}(\cdot, 1\!\pm\!\htmlData{tip=clip range}{\epsilon})\hat{A}_i\right) + \htmlData{tip=KL penalty weight}{\beta} \, \htmlData{tip=KL divergence from reference}{\text{KL}(\pi_\theta \| \pi_{\text{ref}})}"></span>
     </div>
   </div>
 
@@ -529,20 +529,20 @@ z_ref = <span class="fn">mean</span>([<span class="fn">KL</span>(policy(y|x) ∥
 
   <div class="card">
     <h3>How it works</h3>
-    <p>SimPO removes the need for a <strong>reference model</strong> entirely. The key idea: use the <strong>average log-probability</strong> of a sequence under the policy itself as the implicit reward. This is both the reward signal and the optimization target.</p>
+    <p>SimPO removes the need for a <strong>reference model</strong> entirely. The key idea: use the <span class="sym-ref" data-symbol="simpo-len"><strong>average log-probability</strong></span> of a sequence under the policy itself as the implicit reward. This is both the reward signal and the optimization target.</p>
     <div class="math-block">
-      <span class="math-render" data-formula="\htmlData{tip=SimPO implicit reward}{r_{\text{SimPO}}(x, y)} = \htmlData{tip=length normalization}{\frac{1}{|y|}} \log \htmlData{tip=policy probability}{\pi_\theta(y|x)} = \frac{1}{|y|} \sum_{t=1}^{|y|} \log \htmlData{tip=per-token probability}{\pi_\theta(y_t | x, y_{<t})}"></span>
+      <span class="math-render" data-formula="\htmlData{tip=SimPO implicit reward}{r_{\text{SimPO}}(x, y)} = \htmlData{symbol=simpo-len}{\htmlData{tip=length normalization}{\frac{1}{|y|}}} \log \htmlData{tip=policy probability}{\pi_\theta(y|x)} = \frac{1}{|y|} \sum_{t=1}^{|y|} \log \htmlData{tip=per-token probability}{\pi_\theta(y_t | x, y_{<t})}"></span>
     </div>
-    <p>The length normalization (<span class="math-inline" data-formula="1/|y|"></span>) is crucial — it prevents the model from favoring shorter responses simply because they have fewer terms in the sum.</p>
-    <p>SimPO also adds a target reward <strong>margin</strong> <span class="math-inline" data-formula="\gamma > 0"></span> to ensure a minimum gap between preferred and rejected:</p>
+    <p>The <span class="sym-ref" data-symbol="simpo-len">length normalization (<span class="math-inline" data-formula="1/|y|"></span>)</span> is crucial — it prevents the model from favoring shorter responses simply because they have fewer terms in the sum.</p>
+    <p>SimPO also adds a target reward <span class="sym-ref" data-symbol="simpo-gamma"><strong>margin</strong> <span class="math-inline" data-formula="\gamma > 0"></span></span> to ensure a minimum gap between preferred and rejected:</p>
     <div class="math-block">
-      <span class="math-render" data-formula="\htmlData{tip=SimPO loss}{\mathcal{L}_{\text{SimPO}}(\theta)} = -\mathbb{E}_{(\htmlData{tip=prompt}{x},\, \htmlData{tip=preferred}{y_w},\, \htmlData{tip=rejected}{y_l})} \left[ \log \sigma \left( \frac{\htmlData{tip=inverse temperature}{\beta}}{|y_w|} \log \pi_\theta(y_w|x) - \frac{\beta}{|y_l|} \log \pi_\theta(y_l|x) - \htmlData{tip=target margin: min reward gap}{\gamma} \right) \right]"></span>
+      <span class="math-render" data-formula="\htmlData{tip=SimPO loss}{\mathcal{L}_{\text{SimPO}}(\theta)} = -\mathbb{E}_{(\htmlData{tip=prompt}{x},\, \htmlData{tip=preferred}{y_w},\, \htmlData{tip=rejected}{y_l})} \left[ \log \sigma \left( \frac{\htmlData{tip=inverse temperature}{\beta}}{|y_w|} \log \pi_\theta(y_w|x) - \frac{\beta}{|y_l|} \log \pi_\theta(y_l|x) - \htmlData{symbol=simpo-gamma}{\htmlData{tip=target margin: min reward gap}{\gamma}} \right) \right]"></span>
     </div>
   </div>
 
   <div class="chart-wrapper">
     <h3>SimPO vs DPO Loss Comparison</h3>
-    <p>The margin <span class="math-inline" data-formula="\gamma"></span> shifts SimPO's loss curve to the right, requiring a larger reward gap before the loss approaches zero. This encourages stronger separation between preferred and rejected outputs.</p>
+    <p>The <span class="sym-ref" data-symbol="simpo-gamma">margin <span class="math-inline" data-formula="\gamma"></span></span> shifts SimPO's loss curve to the right, requiring a larger reward gap before the loss approaches zero. This encourages stronger separation between preferred and rejected outputs.</p>
     <div class="slider-group">
       <label>γ (margin):</label>
       <input type="range" id="simpo-gamma" min="0" max="3" step="0.1" value="1.0">
