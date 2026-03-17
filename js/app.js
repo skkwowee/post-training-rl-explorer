@@ -18,12 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // ===== Render KaTeX =====
   document.querySelectorAll('.math-render').forEach(el => {
     try {
-      katex.render(el.dataset.formula, el, { displayMode: true, throwOnError: false });
+      katex.render(el.dataset.formula, el, { displayMode: true, throwOnError: false, trust: true });
     } catch (e) { el.textContent = el.dataset.formula; }
   });
   document.querySelectorAll('.math-inline').forEach(el => {
     try {
-      katex.render(el.dataset.formula, el, { displayMode: false, throwOnError: false });
+      katex.render(el.dataset.formula, el, { displayMode: false, throwOnError: false, trust: true });
     } catch (e) { el.textContent = el.dataset.formula; }
   });
 

@@ -231,6 +231,46 @@ a:hover { color: var(--accent-light); }
   text-align: center;
 }
 
+/* ===== Math Tooltips ===== */
+[data-tip] {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dotted var(--rule);
+  padding-bottom: 1px;
+}
+
+[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: var(--bg);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-style: normal;
+  line-height: 1.4;
+  padding: 0.4rem 0.65rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+[data-tip]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--text);
+  z-index: 10;
+  pointer-events: none;
+}
+
 /* ===== Code Blocks ===== */
 .pseudocode {
   background: #2c2417;
