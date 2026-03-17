@@ -47,7 +47,7 @@ nav {
 }
 
 .nav-inner {
-  max-width: 780px;
+  max-width: 960px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -95,9 +95,9 @@ nav {
 
 /* ===== Main Layout ===== */
 main {
-  max-width: 780px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 2.5rem 2rem 4rem;
+  padding: 2.5rem 3rem 4rem;
 }
 
 .section { display: none; animation: fadeIn 0.25s ease; }
@@ -332,6 +332,7 @@ a:hover { color: var(--accent-light); }
 /* ===== Comparison Table ===== */
 .comparison-table {
   width: 100%;
+  min-width: 700px;
   border-collapse: collapse;
   margin: 1.5rem 0;
   font-size: 0.88rem;
@@ -580,7 +581,7 @@ a:hover { color: var(--accent-light); }
 
 /* ===== Footer ===== */
 footer {
-  max-width: 780px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 2rem;
   border-top: 2px solid var(--text);
