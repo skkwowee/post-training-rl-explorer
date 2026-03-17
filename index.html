@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post-Training RL Explorer</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===== Navigation ===== -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">RL Explorer</div>
+    <button class="nav-tab active" data-target="overview">Overview</button>
+    <button class="nav-tab" data-target="rlhf">RLHF / PPO</button>
+    <button class="nav-tab" data-target="dpo">DPO</button>
+    <button class="nav-tab" data-target="kto">KTO</button>
+    <button class="nav-tab" data-target="grpo">GRPO</button>
+    <button class="nav-tab" data-target="simpo">SimPO</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============================================================ -->
+<!-- OVERVIEW -->
+<!-- ============================================================ -->
+<div id="overview" class="section active">
+  <h1>Post-Training RL Explorer</h1>
+  <p class="hero-subtitle">An interactive guide to the reinforcement learning techniques used to align large language models after pre-training. Explore how RLHF, DPO, KTO, GRPO, and SimPO work — with live visualizations and hands-on demos.</p>
+
+  <h2>The Post-Training Pipeline</h2>
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-label">Step 1</div>
+      <div class="step-name">Pre-training</div>
+      <div style="font-size:0.8rem;color:var(--text-muted)">Next-token prediction on web text</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="step-label">Step 2</div>
+      <div class="step-name">SFT</div>
+      <div style="font-size:0.8rem;color:var(--text-muted)">Supervised fine-tuning on demonstrations</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step" style="border-color:var(--accent)">
+      <div class="step-label">Step 3</div>
+      <div class="step-name" style="color:var(--accent-light)">RL Alignment</div>
+      <div style="font-size:0.8rem;color:var(--text-muted)">RLHF / DPO / KTO / GRPO / SimPO</div>
+    </div>
+    <div class="pipeline-arrow">→</div>
+    <div class="pipeline-step">
+      <div class="step-label">Step 4</div>
+      <div class="step-name">Deployed Model</div>
+      <div style="font-size:0.8rem;color:var(--text-muted)">Helpful, harmless, and honest</div>
+    </div>
+  </div>
+
+  <h2>Method Comparison</h2>
+  <div style="overflow-x:auto">
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>RLHF / PPO</th>
+          <th>DPO</th>
+          <th>KTO</th>
+          <th>GRPO</th>
+          <th>SimPO</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Reward Model</strong></td>
+          <td><span class="check">✓</span> Separate RM</td>
+          <td><span class="cross">✗</span> Implicit</td>
+          <td><span class="cross">✗</span> Implicit</td>
+          <td><span class="check">✓</span> Used for scoring</td>
+          <td><span class="cross">✗</span> Implicit</td>
+        </tr>
+        <tr>
+          <td><strong>Reference Model</strong></td>
+          <td><span class="check">✓</span> KL penalty</td>
+          <td><span class="check">✓</span> In loss</td>
+          <td><span class="check">✓</span> In loss</td>
+          <td><span class="check">✓</span> KL penalty</td>
+          <td><span class="cross">✗</span> Not needed</td>
+        </tr>
+        <tr>
+          <td><strong>Critic / Value Network</strong></td>
+          <td><span class="check">✓</span> Required</td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span> Group baseline</td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td><strong>Data Format</strong></td>
+          <td>Prompts + RM scores</td>
+          <td>Preference pairs</td>
+          <td>Binary (good / bad)</td>
+          <td>Prompts + RM scores</td>
+          <td>Preference pairs</td>
+        </tr>
+        <tr>
+          <td><strong>Online Generation</strong></td>
+          <td><span class="check">✓</span> Yes</td>
+          <td><span class="cross">✗</span> Offline</td>
+          <td><span class="cross">✗</span> Offline</td>
+          <td><span class="check">✓</span> Yes</td>
+          <td><span class="cross">✗</span> Offline</td>
+        </tr>
+        <tr>
+          <td><strong>Training Stability</strong></td>
+          <td>Tricky to tune</td>
+          <td>Stable</td>
+          <td>Stable</td>
+          <td>Moderate</td>
+          <td>Stable</td>
+        </tr>
+        <tr>
+          <td><strong>Memory Cost</strong></td>
+          <td>High (4 models)</td>
+          <td>Medium (2 models)</td>
+          <td>Medium (2 models)</td>
+          <td>Medium-High</td>
+          <td>Low (1 model)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:2rem">
+    <h3>How to use this site</h3>
+    <p>Click the tabs above to explore each method. Every section includes:</p>
+    <ul style="margin-left:1.5rem;color:var(--text-muted)">
+      <li><strong>Conceptual explanation</strong> with rendered math equations</li>
+      <li><strong>Interactive visualization</strong> — drag sliders to see how parameters change behavior</li>
+      <li><strong>Pseudocode</strong> for the core training loop</li>
+      <li><strong>Try-it demos</strong> where you can label data yourself (DPO, KTO, GRPO)</li>
+      <li><strong>Pros & cons</strong> comparison</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- RLHF / PPO -->
+<!-- ============================================================ -->
+<div id="rlhf" class="section">
+  <div class="method-header">
+    <h2>RLHF / PPO</h2>
+    <span class="method-badge">Reinforcement Learning from Human Feedback</span>
+    <span class="method-paper"><a href="https://arxiv.org/abs/2203.02155" target="_blank">Ouyang et al., 2022</a></span>
+  </div>
+
+  <div class="card">
+    <h3>How it works</h3>
+    <p>RLHF is the original alignment recipe. It's a three-stage process:</p>
+    <ol style="margin-left:1.5rem;color:var(--text-muted);margin-bottom:1rem">
+      <li><strong>Supervised fine-tuning (SFT)</strong> on high-quality demonstrations</li>
+      <li><strong>Reward model training</strong> on human preference comparisons</li>
+      <li><strong>RL fine-tuning with PPO</strong> to maximize the reward model's score while staying close to the SFT policy</li>
+    </ol>
+    <p>The key insight is using a <strong>learned reward model</strong> as a proxy for human preferences, then optimizing against it with PPO while penalizing divergence from the original model via a KL term.</p>
+  </div>
+
+  <div class="card">
+    <h3>PPO Objective</h3>
+    <p>PPO prevents the policy from changing too drastically in a single update by <strong>clipping</strong> the probability ratio:</p>
+    <div class="math-block">
+      <span class="math-render" data-formula="L^{CLIP}(\theta) = \mathbb{E}_t \left[ \min\left( r_t(\theta) \hat{A}_t, \; \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) \hat{A}_t \right) \right]"></span>
+    </div>
+    <p>Where <span class="math-inline" data-formula="r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}"></span> is the probability ratio, and <span class="math-inline" data-formula="\epsilon"></span> controls how far the policy can move per step.</p>
+    <p>The full RLHF objective adds a KL penalty to prevent reward hacking:</p>
+    <div class="math-block">
+      <span class="math-render" data-formula="\max_\theta \; \mathbb{E}_{x \sim D,\, y \sim \pi_\theta} \left[ R_\phi(x, y) - \beta \, \text{KL}(\pi_\theta \| \pi_{\text{ref}}) \right]"></span>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>PPO Clipping Function</h3>
+    <p>Drag the slider to see how <span class="math-inline" data-formula="\epsilon"></span> controls the clipping region. Larger <span class="math-inline" data-formula="\epsilon"></span> = more policy change allowed per step.</p>
+    <div class="slider-group">
+      <label>ε (clip range):</label>
+      <input type="range" id="ppo-epsilon" min="0.05" max="0.5" step="0.01" value="0.2">
+      <span class="slider-value" id="ppo-epsilon-val">0.20</span>
+    </div>
+    <div class="chart-container" style="height:350px">
+      <canvas id="ppo-chart"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Pseudocode</h3>
+    <div class="pseudocode">
+<span class="cm"># Stage 1: Train reward model on human preferences</span>
+<span class="kw">for</span> (x, y_w, y_l) <span class="kw">in</span> preference_data:
+    loss = -<span class="fn">log_sigmoid</span>(R(x, y_w) - R(x, y_l))
+
+<span class="cm"># Stage 2: PPO training loop</span>
+<span class="kw">for</span> epoch <span class="kw">in</span> <span class="fn">range</span>(num_epochs):
+    <span class="cm"># Sample from current policy</span>
+    prompts = <span class="fn">sample_batch</span>(dataset)
+    responses = <span class="fn">generate</span>(policy, prompts)
+    rewards = <span class="fn">reward_model</span>(prompts, responses)
+
+    <span class="cm"># Compute advantages using GAE</span>
+    advantages = <span class="fn">compute_gae</span>(rewards, values)
+
+    <span class="cm"># PPO update with clipping</span>
+    <span class="kw">for</span> mini_epoch <span class="kw">in</span> <span class="fn">range</span>(K):
+        ratio = policy(responses) / old_policy(responses)
+        clipped = <span class="fn">clip</span>(ratio, <span class="num">1</span>-ε, <span class="num">1</span>+ε) * advantages
+        policy_loss = -<span class="fn">min</span>(ratio * advantages, clipped)
+        kl_penalty = β * <span class="fn">KL</span>(policy ∥ ref_policy)
+        loss = policy_loss + kl_penalty
+        <span class="fn">optimizer.step</span>(loss)
+    </div>
+  </div>
+
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>Pros</h4>
+      <ul>
+        <li>Strong empirical results (GPT-4, Claude, etc.)</li>
+        <li>Online learning — generates its own training data</li>
+        <li>Can optimize complex, non-differentiable rewards</li>
+        <li>Well-studied algorithm with theoretical guarantees</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Cons</h4>
+      <ul>
+        <li>Requires 4 models in memory (policy, ref, RM, critic)</li>
+        <li>Sensitive to hyperparameters</li>
+        <li>Reward model can be exploited (reward hacking)</li>
+        <li>Complex infrastructure and training instability</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- DPO -->
+<!-- ============================================================ -->
+<div id="dpo" class="section">
+  <div class="method-header">
+    <h2>DPO</h2>
+    <span class="method-badge">Direct Preference Optimization</span>
+    <span class="method-paper"><a href="https://arxiv.org/abs/2305.18290" target="_blank">Rafailov et al., 2023</a></span>
+  </div>
+
+  <div class="card">
+    <h3>How it works</h3>
+    <p>DPO's key insight: you don't need a separate reward model. The <strong>optimal policy under the RLHF objective has a closed-form solution</strong> that relates the reward to the log-ratio of the policy and reference model:</p>
+    <div class="math-block">
+      <span class="math-render" data-formula="r(x, y) = \beta \log \frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)} + \beta \log Z(x)"></span>
+    </div>
+    <p>Substituting this into the Bradley-Terry preference model gives us a loss we can optimize <strong>directly on preference pairs</strong>, bypassing reward modeling entirely:</p>
+    <div class="math-block">
+      <span class="math-render" data-formula="\mathcal{L}_{\text{DPO}}(\theta) = -\mathbb{E}_{(x, y_w, y_l)} \left[ \log \sigma \left( \beta \log \frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \beta \log \frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)} \right) \right]"></span>
+    </div>
+    <p>The parameter <span class="math-inline" data-formula="\beta"></span> controls how much the policy can deviate from the reference. Higher <span class="math-inline" data-formula="\beta"></span> = stronger preference signal but more divergence allowed.</p>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>DPO Loss vs. Reward Margin</h3>
+    <p>The loss decreases as the reward margin (preferred minus rejected) increases. Adjust <span class="math-inline" data-formula="\beta"></span> to see how it affects the gradient signal.</p>
+    <div class="slider-group">
+      <label>β (temperature):</label>
+      <input type="range" id="dpo-beta" min="0.05" max="0.5" step="0.01" value="0.1">
+      <span class="slider-value" id="dpo-beta-val">0.1</span>
+    </div>
+    <div class="chart-container" style="height:350px">
+      <canvas id="dpo-chart"></canvas>
+    </div>
+  </div>
+
+  <div class="demo-box">
+    <h3>Try It: Preference Labeling</h3>
+    <p style="color:var(--text-muted)">DPO needs preference pairs. Click the response you think is <strong>better</strong> — then see how your label compares to the expert.</p>
+    <div class="demo-prompt" id="dpo-demo-prompt"></div>
+    <div class="demo-pair">
+      <div class="demo-response" id="dpo-demo-a" style="cursor:pointer"></div>
+      <div class="demo-response" id="dpo-demo-b" style="cursor:pointer"></div>
+    </div>
+    <div class="demo-feedback" id="dpo-demo-feedback"></div>
+    <button class="btn" id="dpo-demo-next" style="margin-top:0.75rem">Next Pair →</button>
+  </div>
+
+  <div class="card">
+    <h3>Pseudocode</h3>
+    <div class="pseudocode">
+<span class="cm"># DPO — no reward model, no RL!</span>
+<span class="kw">for</span> (x, y_w, y_l) <span class="kw">in</span> preference_data:
+    <span class="cm"># Compute log-probabilities under current policy</span>
+    log_pw = <span class="fn">log_prob</span>(policy, y_w | x)
+    log_pl = <span class="fn">log_prob</span>(policy, y_l | x)
+
+    <span class="cm"># Compute log-probabilities under frozen reference</span>
+    log_rw = <span class="fn">log_prob</span>(ref_policy, y_w | x)
+    log_rl = <span class="fn">log_prob</span>(ref_policy, y_l | x)
+
+    <span class="cm"># The implicit reward margin</span>
+    margin = β * ((log_pw - log_rw) - (log_pl - log_rl))
+
+    <span class="cm"># DPO loss: negative log-sigmoid of the margin</span>
+    loss = -<span class="fn">log_sigmoid</span>(margin)
+    <span class="fn">optimizer.step</span>(loss)
+    </div>
+  </div>
+
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>Pros</h4>
+      <ul>
+        <li>No reward model needed — simpler pipeline</li>
+        <li>Stable supervised training (no RL instability)</li>
+        <li>Memory-efficient (only 2 models: policy + reference)</li>
+        <li>Strong theoretical foundation</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Cons</h4>
+      <ul>
+        <li>Offline only — can't improve from its own generations</li>
+        <li>Still needs a reference model in memory</li>
+        <li>Requires paired preference data (more expensive to collect)</li>
+        <li>Can underfit when β is too low</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- KTO -->
+<!-- ============================================================ -->
+<div id="kto" class="section">
+  <div class="method-header">
+    <h2>KTO</h2>
+    <span class="method-badge">Kahneman-Tversky Optimization</span>
+    <span class="method-paper"><a href="https://arxiv.org/abs/2402.01306" target="_blank">Ethayarajh et al., 2024</a></span>
+  </div>
+
+  <div class="card">
+    <h3>How it works</h3>
+    <p>KTO is motivated by <strong>prospect theory</strong> from behavioral economics: humans perceive losses more strongly than equivalent gains. Instead of preference pairs, KTO only needs <strong>binary feedback</strong> — thumbs up or thumbs down on individual outputs.</p>
+    <p>The key insight: in prospect theory, the value function is <strong>concave for gains and convex for losses</strong>, with losses weighted more heavily (loss aversion parameter <span class="math-inline" data-formula="\lambda"></span>).</p>
+    <div class="math-block">
+      <span class="math-render" data-formula="\mathcal{L}_{\text{KTO}}(\theta) = \mathbb{E}_{x,y} \left[ \lambda_y \left(1 - v\left(\beta \left(\log \frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)} - z_{\text{ref}}\right)\right)\right) \right]"></span>
+    </div>
+    <p>Where <span class="math-inline" data-formula="v(x) = \sigma(x)"></span> for desirable outputs (<span class="math-inline" data-formula="\lambda_y = \lambda_D"></span>) and <span class="math-inline" data-formula="v(x) = \sigma(-x)"></span> for undesirable outputs (<span class="math-inline" data-formula="\lambda_y = \lambda_U"></span>). The reference point <span class="math-inline" data-formula="z_{\text{ref}}"></span> is the expected KL divergence.</p>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>Prospect Theory Value Function</h3>
+    <p>Adjust the loss aversion parameter <span class="math-inline" data-formula="\lambda"></span>. At <span class="math-inline" data-formula="\lambda = 1"></span>, gains and losses are symmetric. Higher values mean losses "hurt" more than gains "help."</p>
+    <div class="slider-group">
+      <label>λ (loss aversion):</label>
+      <input type="range" id="kto-lambda" min="1.0" max="4.0" step="0.1" value="2.25">
+      <span class="slider-value" id="kto-lambda-val">2.3</span>
+    </div>
+    <div class="chart-container" style="height:350px">
+      <canvas id="kto-chart"></canvas>
+    </div>
+  </div>
+
+  <div class="demo-box">
+    <h3>Try It: Binary Feedback</h3>
+    <p style="color:var(--text-muted)">KTO only needs thumbs up/down — no pairwise comparisons. Rate each response, then see if you match the expert label.</p>
+    <div class="demo-prompt" id="kto-demo-prompt"></div>
+    <div class="kto-response" id="kto-demo-text"></div>
+    <div class="kto-buttons">
+      <button class="btn btn-green btn-sm" onclick="ktoVote('up')">👍 Good</button>
+      <button class="btn btn-red btn-sm" onclick="ktoVote('down')">👎 Bad</button>
+    </div>
+    <div class="demo-feedback" id="kto-demo-feedback"></div>
+    <div class="kto-stats">
+      <span>👍 <span id="kto-stat-up">0</span></span>
+      <span>👎 <span id="kto-stat-down">0</span></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Pseudocode</h3>
+    <div class="pseudocode">
+<span class="cm"># KTO — only needs binary labels, not pairs!</span>
+<span class="cm"># Compute reference point (expected KL over dataset)</span>
+z_ref = <span class="fn">mean</span>([<span class="fn">KL</span>(policy(y|x) ∥ ref(y|x)) <span class="kw">for</span> x, y <span class="kw">in</span> data])
+
+<span class="kw">for</span> (x, y, is_desirable) <span class="kw">in</span> binary_feedback_data:
+    <span class="cm"># Log-ratio relative to reference point</span>
+    log_ratio = <span class="fn">log_prob</span>(policy, y|x) - <span class="fn">log_prob</span>(ref, y|x)
+    u = β * (log_ratio - z_ref)
+
+    <span class="kw">if</span> is_desirable:
+        loss = λ_D * (<span class="num">1</span> - <span class="fn">sigmoid</span>(u))    <span class="cm"># push up</span>
+    <span class="kw">else</span>:
+        loss = λ_U * (<span class="num">1</span> - <span class="fn">sigmoid</span>(-u))   <span class="cm"># push down</span>
+
+    <span class="fn">optimizer.step</span>(loss)
+    </div>
+  </div>
+
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>Pros</h4>
+      <ul>
+        <li>Only needs binary feedback — much cheaper to collect</li>
+        <li>Grounded in human decision theory (prospect theory)</li>
+        <li>Works with unbalanced positive/negative data</li>
+        <li>Matches or beats DPO on many benchmarks</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Cons</h4>
+      <ul>
+        <li>Still requires a reference model</li>
+        <li>Offline only — no online generation</li>
+        <li>Less established than DPO in production</li>
+        <li>Hyperparameter sensitivity (λ_D, λ_U, β)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- GRPO -->
+<!-- ============================================================ -->
+<div id="grpo" class="section">
+  <div class="method-header">
+    <h2>GRPO</h2>
+    <span class="method-badge">Group Relative Policy Optimization</span>
+    <span class="method-paper"><a href="https://arxiv.org/abs/2402.03300" target="_blank">Shao et al., 2024</a></span>
+  </div>
+
+  <div class="card">
+    <h3>How it works</h3>
+    <p>GRPO simplifies PPO by <strong>eliminating the critic (value) network entirely</strong>. Instead of learning a value function to estimate advantages, GRPO samples a <strong>group</strong> of outputs for each prompt and uses the group statistics as a baseline.</p>
+    <p>For each prompt <span class="math-inline" data-formula="x"></span>, sample <span class="math-inline" data-formula="G"></span> responses <span class="math-inline" data-formula="\{y_1, \ldots, y_G\}"></span>, score each with a reward model, then normalize within the group:</p>
+    <div class="math-block">
+      <span class="math-render" data-formula="\hat{A}_i = \frac{r_i - \text{mean}(\mathbf{r})}{\text{std}(\mathbf{r})}"></span>
+    </div>
+    <p>The policy is then updated using a PPO-style clipped objective with these group-relative advantages and a KL penalty to the reference policy:</p>
+    <div class="math-block">
+      <span class="math-render" data-formula="\mathcal{L}_{\text{GRPO}}(\theta) = -\frac{1}{G}\sum_{i=1}^{G} \min\left(\frac{\pi_\theta(y_i|x)}{\pi_{\theta_{old}}(y_i|x)}\hat{A}_i, \;\text{clip}(\cdot, 1\!\pm\!\epsilon)\hat{A}_i\right) + \beta \, \text{KL}(\pi_\theta \| \pi_{\text{ref}})"></span>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>Group Sampling &amp; Advantages</h3>
+    <p>Each resample generates a new group of 8 responses for a prompt. The <span style="color:var(--accent-light)">purple bars</span> show raw reward scores; <span style="color:var(--green)">green</span>/<span style="color:var(--red)">red</span> bars show normalized advantages. The <span style="color:var(--orange)">dashed line</span> is the group mean.</p>
+    <div class="chart-container" style="height:350px">
+      <canvas id="grpo-chart"></canvas>
+    </div>
+    <div id="grpo-samples" class="grpo-group" style="margin-top:1rem"></div>
+    <button class="btn" id="grpo-resample" style="margin-top:0.75rem">🔄 Resample Group</button>
+  </div>
+
+  <div class="card">
+    <h3>Pseudocode</h3>
+    <div class="pseudocode">
+<span class="cm"># GRPO — no critic needed! Group statistics replace the value function</span>
+<span class="kw">for</span> x <span class="kw">in</span> prompts:
+    <span class="cm"># Sample a group of G responses</span>
+    group = [<span class="fn">generate</span>(policy, x) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(G)]
+    rewards = [<span class="fn">reward_model</span>(x, y) <span class="kw">for</span> y <span class="kw">in</span> group]
+
+    <span class="cm"># Compute group-relative advantages</span>
+    μ, σ = <span class="fn">mean</span>(rewards), <span class="fn">std</span>(rewards)
+    advantages = [(r - μ) / σ <span class="kw">for</span> r <span class="kw">in</span> rewards]
+
+    <span class="cm"># PPO-style clipped update</span>
+    <span class="kw">for</span> y_i, A_i <span class="kw">in</span> <span class="fn">zip</span>(group, advantages):
+        ratio = policy(y_i|x) / old_policy(y_i|x)
+        clipped = <span class="fn">clip</span>(ratio, <span class="num">1</span>-ε, <span class="num">1</span>+ε) * A_i
+        loss = -<span class="fn">min</span>(ratio * A_i, clipped)
+        loss += β * <span class="fn">KL</span>(policy ∥ ref_policy)
+    <span class="fn">optimizer.step</span>(loss)
+    </div>
+  </div>
+
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>Pros</h4>
+      <ul>
+        <li>No critic network — significant memory savings over PPO</li>
+        <li>Online learning from own generations</li>
+        <li>Works well with verifiable rewards (math, code)</li>
+        <li>Used in DeepSeek-R1, proving effectiveness at scale</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Cons</h4>
+      <ul>
+        <li>Requires generating G outputs per prompt (compute cost)</li>
+        <li>Still needs a reward model for scoring</li>
+        <li>Group size G is a sensitive hyperparameter</li>
+        <li>Variance of advantage estimates depends on group quality</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SimPO -->
+<!-- ============================================================ -->
+<div id="simpo" class="section">
+  <div class="method-header">
+    <h2>SimPO</h2>
+    <span class="method-badge">Simple Preference Optimization</span>
+    <span class="method-paper"><a href="https://arxiv.org/abs/2405.14734" target="_blank">Meng et al., 2024</a></span>
+  </div>
+
+  <div class="card">
+    <h3>How it works</h3>
+    <p>SimPO removes the need for a <strong>reference model</strong> entirely. The key idea: use the <strong>average log-probability</strong> of a sequence under the policy itself as the implicit reward. This is both the reward signal and the optimization target.</p>
+    <div class="math-block">
+      <span class="math-render" data-formula="r_{\text{SimPO}}(x, y) = \frac{1}{|y|} \log \pi_\theta(y|x) = \frac{1}{|y|} \sum_{t=1}^{|y|} \log \pi_\theta(y_t | x, y_{<t})"></span>
+    </div>
+    <p>The length normalization (<span class="math-inline" data-formula="1/|y|"></span>) is crucial — it prevents the model from favoring shorter responses simply because they have fewer terms in the sum.</p>
+    <p>SimPO also adds a target reward <strong>margin</strong> <span class="math-inline" data-formula="\gamma > 0"></span> to ensure a minimum gap between preferred and rejected:</p>
+    <div class="math-block">
+      <span class="math-render" data-formula="\mathcal{L}_{\text{SimPO}}(\theta) = -\mathbb{E}_{(x, y_w, y_l)} \left[ \log \sigma \left( \frac{\beta}{|y_w|} \log \pi_\theta(y_w|x) - \frac{\beta}{|y_l|} \log \pi_\theta(y_l|x) - \gamma \right) \right]"></span>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>SimPO vs DPO Loss Comparison</h3>
+    <p>The margin <span class="math-inline" data-formula="\gamma"></span> shifts SimPO's loss curve to the right, requiring a larger reward gap before the loss approaches zero. This encourages stronger separation between preferred and rejected outputs.</p>
+    <div class="slider-group">
+      <label>γ (margin):</label>
+      <input type="range" id="simpo-gamma" min="0" max="3" step="0.1" value="1.0">
+      <span class="slider-value" id="simpo-gamma-val">1.0</span>
+    </div>
+    <div class="chart-container" style="height:350px">
+      <canvas id="simpo-chart"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Pseudocode</h3>
+    <div class="pseudocode">
+<span class="cm"># SimPO — no reference model, no reward model!</span>
+<span class="kw">for</span> (x, y_w, y_l) <span class="kw">in</span> preference_data:
+    <span class="cm"># Length-normalized average log-probs as reward</span>
+    r_w = <span class="fn">sum</span>(<span class="fn">log_prob</span>(policy, y_w | x)) / <span class="fn">len</span>(y_w)
+    r_l = <span class="fn">sum</span>(<span class="fn">log_prob</span>(policy, y_l | x)) / <span class="fn">len</span>(y_l)
+
+    <span class="cm"># SimPO loss with margin γ</span>
+    margin = β * r_w - β * r_l - γ
+    loss = -<span class="fn">log_sigmoid</span>(margin)
+
+    <span class="fn">optimizer.step</span>(loss)
+    </div>
+  </div>
+
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>Pros</h4>
+      <ul>
+        <li>No reference model — lowest memory footprint (1 model)</li>
+        <li>Simplest implementation of all methods</li>
+        <li>Length normalization prevents degenerate solutions</li>
+        <li>Margin γ provides a controllable quality gap</li>
+        <li>Outperforms DPO on several benchmarks</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Cons</h4>
+      <ul>
+        <li>Offline only — requires pre-collected preference data</li>
+        <li>Newer method, less battle-tested in production</li>
+        <li>Average log-prob reward may not capture all quality aspects</li>
+        <li>Sensitive to the margin hyperparameter γ</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ===== Footer ===== -->
+<footer>
+  <p>Post-Training RL Explorer — An interactive educational demo</p>
+  <p style="margin-top:0.5rem">
+    Papers:
+    <a href="https://arxiv.org/abs/2203.02155" target="_blank">RLHF (Ouyang 2022)</a> ·
+    <a href="https://arxiv.org/abs/2305.18290" target="_blank">DPO (Rafailov 2023)</a> ·
+    <a href="https://arxiv.org/abs/2402.01306" target="_blank">KTO (Ethayarajh 2024)</a> ·
+    <a href="https://arxiv.org/abs/2402.03300" target="_blank">GRPO (Shao 2024)</a> ·
+    <a href="https://arxiv.org/abs/2405.14734" target="_blank">SimPO (Meng 2024)</a>
+  </p>
+</footer>
+
+<!-- App JS -->
+<script src="js/app.js"></script>
+
+</body>
+</html>
