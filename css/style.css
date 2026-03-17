@@ -341,17 +341,18 @@ a:hover { color: var(--accent-light); }
 
 .comparison-table th,
 .comparison-table td {
-  padding: 0.6rem 0.75rem;
+  padding: 0.75rem 0.75rem;
   text-align: left;
   border-bottom: 1px solid var(--border-light);
+  white-space: normal;
+  word-wrap: break-word;
+  vertical-align: top;
 }
 
 .comparison-table th {
   background: var(--bg);
   color: var(--text);
   font-weight: 600;
-  position: sticky;
-  top: 52px;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
