@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ===== Chart.js Global Config =====
-  Chart.defaults.color = '#8892b0';
-  Chart.defaults.borderColor = 'rgba(42,46,69,0.5)';
+  Chart.defaults.color = '#7a6f63';
+  Chart.defaults.borderColor = 'rgba(200,191,176,0.4)';
   Chart.defaults.font.family = "'Inter', sans-serif";
 
   // ===== 1. RLHF/PPO: Clipping Function =====
@@ -62,8 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
             {
               label: 'PPO Objective (min of clipped, unclipped)',
               data: d.points,
-              borderColor: '#6c63ff',
-              backgroundColor: 'rgba(108,99,255,0.1)',
+              borderColor: '#b33d26',
+              backgroundColor: 'rgba(179,61,38,0.1)',
               borderWidth: 2.5,
               pointRadius: 0,
               fill: true,
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
               label: 'Clipped ratio × advantage',
               data: d.clippedPoints,
-              borderColor: '#f59e0b',
+              borderColor: '#c47a1a',
               borderWidth: 1.5,
               borderDash: [5, 5],
               pointRadius: 0,
@@ -126,8 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
           datasets: [{
             label: `DPO Loss (β=${beta.toFixed(1)})`,
             data: d.lossVals,
-            borderColor: '#6c63ff',
-            backgroundColor: 'rgba(108,99,255,0.1)',
+            borderColor: '#b33d26',
+            backgroundColor: 'rgba(179,61,38,0.1)',
             borderWidth: 2.5,
             pointRadius: 0,
             fill: true,
@@ -238,15 +238,15 @@ document.addEventListener('DOMContentLoaded', () => {
           datasets: [{
             label: `Value Function (λ=${lambda.toFixed(1)})`,
             data: d.vals,
-            borderColor: '#6c63ff',
+            borderColor: '#b33d26',
             backgroundColor: (ctx) => {
               const chart = ctx.chart;
               const { ctx: c, chartArea } = chart;
-              if (!chartArea) return 'rgba(108,99,255,0.1)';
+              if (!chartArea) return 'rgba(179,61,38,0.1)';
               const gradient = c.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
-              gradient.addColorStop(0, 'rgba(239,68,68,0.15)');
-              gradient.addColorStop(0.5, 'rgba(108,99,255,0.05)');
-              gradient.addColorStop(1, 'rgba(34,197,94,0.15)');
+              gradient.addColorStop(0, 'rgba(179,61,38,0.15)');
+              gradient.addColorStop(0.5, 'rgba(179,61,38,0.05)');
+              gradient.addColorStop(1, 'rgba(58,125,68,0.15)');
               return gradient;
             },
             borderWidth: 2.5,
@@ -349,16 +349,16 @@ document.addEventListener('DOMContentLoaded', () => {
             {
               label: 'Reward Score',
               data: scores,
-              backgroundColor: 'rgba(108,99,255,0.6)',
-              borderColor: '#6c63ff',
+              backgroundColor: 'rgba(179,61,38,0.6)',
+              borderColor: '#b33d26',
               borderWidth: 1,
               yAxisID: 'y',
             },
             {
               label: 'Advantage (normalized)',
               data: advantages.map(a => parseFloat(a.toFixed(2))),
-              backgroundColor: advantages.map(a => a >= 0 ? 'rgba(34,197,94,0.6)' : 'rgba(239,68,68,0.6)'),
-              borderColor: advantages.map(a => a >= 0 ? '#22c55e' : '#ef4444'),
+              backgroundColor: advantages.map(a => a >= 0 ? 'rgba(58,125,68,0.6)' : 'rgba(179,61,38,0.6)'),
+              borderColor: advantages.map(a => a >= 0 ? '#3a7d44' : '#b33d26'),
               borderWidth: 1,
               yAxisID: 'y1',
             }
@@ -375,10 +375,10 @@ document.addEventListener('DOMContentLoaded', () => {
                   type: 'line',
                   yMin: mean,
                   yMax: mean,
-                  borderColor: '#f59e0b',
+                  borderColor: '#c47a1a',
                   borderWidth: 2,
                   borderDash: [6, 3],
-                  label: { content: `μ = ${mean.toFixed(1)}`, display: true, position: 'end', backgroundColor: 'rgba(245,158,11,0.8)', font: { size: 11 } }
+                  label: { content: `μ = ${mean.toFixed(1)}`, display: true, position: 'end', backgroundColor: 'rgba(196,122,26,0.85)', font: { size: 11 } }
                 }
               }
             }
@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
               label: 'DPO Loss',
               data: d.dpoLoss,
-              borderColor: '#8892b0',
+              borderColor: '#a09688',
               borderWidth: 2,
               borderDash: [5, 5],
               pointRadius: 0,
@@ -446,8 +446,8 @@ document.addEventListener('DOMContentLoaded', () => {
             {
               label: `SimPO Loss (γ=${gamma.toFixed(1)})`,
               data: d.simpoLoss,
-              borderColor: '#6c63ff',
-              backgroundColor: 'rgba(108,99,255,0.1)',
+              borderColor: '#b33d26',
+              backgroundColor: 'rgba(179,61,38,0.1)',
               borderWidth: 2.5,
               pointRadius: 0,
               fill: true,
